@@ -12,15 +12,17 @@ import pytz
 # If modifying these scopes, delete the file token.json.
 SCOPES = ['https://www.googleapis.com/auth/calendar.readonly']
 
+DIR_PATH = os.path.dirname(os.path.abspath(__file__))
+
 def get_calendar_id():
     '''Return Calendar ID of classes'''
 
-    if not os.path.isfile(".env"):
+    if not os.path.isfile(os.path.join(DIR_PATH, '.env')):
         print("No '.env' file found. Attempting to get variables from environment.")
 
         return os.environ["CALENDAR_ID"]
     else:
-        config = dotenv_values(".env")
+        config = dotenv_values(os.path.join(DIR_PATH, '.env'))
 
         return config.get("CALENDAR_ID")
 
@@ -31,18 +33,18 @@ def get_creds_calendar():
     # The file token.json stores the user's access and refresh tokens, and is
     # created automatically when the authorization flow completes for the first
     # time.
-    if os.path.exists('token.json'):
-        creds = Credentials.from_authorized_user_file('token.json', SCOPES)
+    if os.path.exists(os.path.join(DIR_PATH, 'token.json')):
+        creds = Credentials.from_authorized_user_file(os.path.join(DIR_PATH, 'token.json'), SCOPES)
     # If there are no (valid) credentials available, let the user log in.
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else:
             flow = InstalledAppFlow.from_client_secrets_file(
-                'credentials.json', SCOPES)
+                os.path.join(DIR_PATH, 'credentials.json'), SCOPES)
             creds = flow.run_local_server(port=0)
         # Save the credentials for the next run
-        with open('token.json', 'w') as token:
+        with open(os.path.join(DIR_PATH, 'token.json'), 'w') as token:
             token.write(creds.to_json())
     return creds
 
@@ -79,13 +81,13 @@ def switch_link(class_name):
     CURRENT_COURSE_LINK = None
     class_path = None
 
-    if not os.path.isfile('.env'):
+    if not os.path.isfile(os.path.join(DIR_PATH, '.env')):
         print("No '.env' file found. Attempting to get variables from environment.")
 
         class_path = os.environ[class_name] or None
         CURRENT_COURSE_LINK = os.environ['CURRENT_COURSE_LINK'] or None
     else:
-        config = dotenv_values('.env')
+        config = dotenv_values(os.path.join(DIR_PATH, '.env'))
 
         class_path = config.get(class_name) or None
         CURRENT_COURSE_LINK = config.get('CURRENT_COURSE_LINK') or None
